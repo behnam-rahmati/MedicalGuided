@@ -386,4 +386,26 @@ cv2.drawContours(convex_hull_img, [convex_hull], 0, 255, -1)
 # Save the convex hull image
 cv2.imwrite('convex_hull.png', convex_hull_img)
 
+################################################################################### Relative Spatial location ############################################################################################################
+def centroids(mask):
+    unique_labels = np.unique(mask)
+    label_centroids = {}
+    for label in unique_labels:
+        if label != 0:  # Skip background label
+            rows, cols = np.where(mask == label)
+            centroid_x = np.mean(cols)
+            centroid_y = np.mean(rows)
+            label_centroids[label] = [centroid_x, centroid_y]
+    return label_centroids
 
+count = 0
+for i in range(len(img_dev)):
+    var = (centroids(single_mask[i]))
+    # Assuming var[1][0] and var[1][1] represent the coordinates of the RV point
+    # Assuming var[2][0] and var[2][1] represent the coordinates of the LV point
+    
+    if(var[1][1]>var[2][1]):
+        count = count +1
+        print(count)
+
+print(count)
