@@ -1,3 +1,71 @@
+###################################################################################  Largest connected Mask Term############################################################################################################
+import numpy as np
+import cv2
+
+# Assuming pred_masks_all contains all the masks and R is the reliability mask
+# Modify the shape of R to match the masks if necessary
+
+largest_reliable_mask = None
+max_reliable_pixels = -1
+
+for mask in pred_masks_all[slice_index]:
+    # Multiply the mask with the reliability mask
+    mask_with_reliability = mask * R
+
+    # Extract contours from the modified mask
+    tmp = mask_with_reliability.astype(np.uint8)
+    coords, _ = cv2.findContours(tmp.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+    if not coords:
+        # No contours found, continue to the next mask
+        continue
+
+    # Find the largest contour based on the number of reliable pixels
+    largest_contour = max(coords, key=lambda x: cv2.contourArea(x))
+
+    # Calculate the number of reliable pixels in the largest contour
+    num_reliable_pixels = np.sum(mask_with_reliability)
+
+    # Update the largest reliable mask if this contour has more reliable pixels
+    if num_reliable_pixels > max_reliable_pixels:
+        max_reliable_pixels = num_reliable_pixels
+        largest_reliable_mask = mask
+
+# Now largest_reliable_mask contains the mask with the highest number of reliable pixels
+
+
+######################################################################################Filling the gaps/ holes (first solution)#######################################################################################################
+
+
+# Read the binary mask
+mask = cv2.imread('binary_mask.png', cv2.IMREAD_GRAYSCALE)
+
+# Find contours in the mask
+contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Create a mask to draw filled contours
+filled_mask = np.zeros_like(mask)
+
+# Fill the contours
+cv2.fillPoly(filled_mask, contours, color=255)
+
+# Save the filled mask
+cv2.imwrite('filled_mask_contours.png', filled_mask)
+######################################################################################Filling the gaps/ holes (second solution)#######################################################################################################
+
+
+# Read the binary mask
+mask = cv2.imread('binary_mask.png', cv2.IMREAD_GRAYSCALE)
+
+# Apply morphological closing to fill the holes
+kernel = np.ones((5, 5), np.uint8)
+filled_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+
+# Save the filled mask
+cv2.imwrite('filled_mask_morphology.png', filled_mask)
+
+
+################################################################################### DEFORMABLE MODELS TERM############################################################################################################
 ### 1- deformable models
 # *********This is a modified version of the original code of Shawn Lankton***********
 # shape prior term is added to the original code
