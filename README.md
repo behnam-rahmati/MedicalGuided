@@ -1,5 +1,6 @@
-Add the medical knowledge term that you want from the Medical-Knowledge-Terms.py to the main.py
-please run the main.py, it includes all the algorithms provided in the manuscript 
+Add the medical knowledge term that you want from the Medical-Knowledge-Terms.py to the main.py. It includes all the algorithms provided in the manuscript 
+
+Run the main.py
 
 it should be used like this: python main.py i/o gpu_id (i is used for endocardium and o is used for epicardium)
 
