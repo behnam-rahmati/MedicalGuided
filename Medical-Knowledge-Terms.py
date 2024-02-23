@@ -340,3 +340,50 @@ if __name__ == "__main__":
     mask[20:100, 20:100] = 1
 
     chanvese(img, mask, max_its=1000, display=True, alpha=1.0)
+
+
+################################################################################### Total variation TERM############################################################################################################
+import tensorflow as tf
+
+def custom_loss(y_true, y_pred):
+    # Define your loss function (e.g., cross-entropy for segmentation)
+    cross_entropy_loss = tf.keras.losses.BinaryCrossentropy()(y_true, y_pred)
+    
+    # Spatial regularization parameter (lambda)
+    lambda_reg = 0.01
+    
+    # Calculate spatial regularization term (e.g., total variation regularization)
+    diff_i = tf.abs(y_pred[:, 1:, :, :] - y_pred[:, :-1, :, :])
+    diff_j = tf.abs(y_pred[:, :, 1:, :] - y_pred[:, :, :-1, :])
+    spatial_reg = lambda_reg * (tf.reduce_sum(diff_i) + tf.reduce_sum(diff_j))
+    
+    # Total loss with regularization
+    total_loss = cross_entropy_loss + spatial_reg
+    
+    return total_loss
+
+
+################################################################################### Convex Hull ############################################################################################################
+
+# Read the binary mask
+mask = cv2.imread('binary_mask.png', cv2.IMREAD_GRAYSCALE)
+
+# Find contours in the mask
+contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Assuming there's only one contour, you can take the first one
+contour = contours[0]
+
+# Find the convex hull of the contour
+convex_hull = cv2.convexHull(contour)
+
+# Create a blank image to draw the convex hull
+convex_hull_img = np.zeros_like(mask)
+
+# Draw the convex hull on the blank image
+cv2.drawContours(convex_hull_img, [convex_hull], 0, 255, -1)
+
+# Save the convex hull image
+cv2.imwrite('convex_hull.png', convex_hull_img)
+
+
